@@ -1,0 +1,54 @@
+{
+	"accounts" : [
+		{
+			"name" : "MyAccount",
+			"type":"Money.Account.Account",
+			"balances" : [
+				{
+					"name" : "Checking",
+					"type":"Money.Balance.Balance",
+					"actions" : [
+						{
+							"type" : "Money.Action.Deposit",
+							"timestamp":12345,
+							"description":"Test 01",
+							"amount":1300
+						},
+						{
+							"type":"Money.Action.Withdraw",
+							"timstamp":23456,
+							"description":"Pizza Test",
+							"amount":500
+						}
+					]
+				},
+				{
+					"name":"Tithing",
+					"type":"Money.Balance.Balance",
+					"actions":[]
+				},
+				{
+					"name":"Savings",
+					"type":"Money.Balance.Balance",
+					"actions":[]
+				}
+			],
+			"handlers":{
+				"Money.Action.Deposit":{
+					"type":"Money.Handler.WeightedSplitter",
+					"action":"Money.Action.Deposit",
+					"weight":[
+						{"Tithing":["Money.Action.Withdraw", 1]},
+						{"Savings":["Money.Action.Deposit", 5]},
+						{"Checking":["Money.Action.Deposit", 4]}
+					]
+				},
+				"Money.Action.Withdraw":{
+					"type":"Money.Handler.BasicHandler",
+					"action":"Money.Action.Withdraw",
+					"balance":"Checking"
+				}
+			}
+		}
+	]
+}
