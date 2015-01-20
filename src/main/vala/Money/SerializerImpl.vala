@@ -94,7 +94,11 @@ namespace Money.Model {
 		}
 
 		public override Money.Model.Account deserialize(string serialized_account) {
-			parser.load_from_data(serialized_account);
+			try {
+				parser.load_from_data(serialized_account);
+			} catch(Error error) {
+				print(@"Error deseriliazing account: $(error.domain.to_string())\n$(error.code)\n$(error.message)\n");
+			}
 			var reader = new Json.Reader(parser.get_root());
 
 			var account = new Account();
