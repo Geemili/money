@@ -1,33 +1,35 @@
 
-public static void main() {
-	//Initialize variables
-	var my_account = new Money.Account.Account();
-	var checking_balance = new Money.Balance.Balance("Checking", {});
-	var tithing_balance = new Money.Balance.Balance("Tithing", {});
-	var savings_balance = new Money.Balance.Balance("Savings", {});
-	var deposit_handler = new Money.Handler.WeightedSplitter(Money.Action.Actions.DEPOSIT, {
-		Money.Handler.BalanceWeight(tithing_balance,1),
-		Money.Handler.BalanceWeight(savings_balance, 5),
-		Money.Handler.BalanceWeight(checking_balance, 4)
-	});
-	var withdraw_handler = new Money.Handler.BasicHandler(Money.Action.Actions.WITHDRAW, checking_balance);
+void test_money() {
+	var model = Money.Model.init_model();
+	model.name = "My Account";
 
-	// Add balances to account
-	my_account.add_balance(checking_balance);
-	my_account.add_balance(tithing_balance);
-	my_account.add_balance(savings_balance);
+	var view = new Money.View.RendererImpl();
+	view.model = model;
 
-	// Add handlers to account
-	my_account.set_handler(Money.Action.Actions.DEPOSIT, deposit_handler);
-	my_account.set_handler(Money.Action.Actions.WITHDRAW, withdraw_handler);
+	var control = new Money.Controller.BasicController();
+	control.model = model;
+	control.view = view;
 
-	my_account.do_action(Money.Action.Actions.DEPOSIT, 1000);
-	my_account.do_action(Money.Action.Actions.DEPOSIT, 1200);
-	my_account.do_action(Money.Action.Actions.DEPOSIT, 3500);
-	my_account.do_action(Money.Action.Actions.WITHDRAW, 500);
+	var checking = control.add_balance("Checking");
+	control.set_balance_deposit_weight(checking, 4);
+	control.set_balance_withdraw_weight(checking, 1);
 
-	var balances = new Money.Balance.Balance[] {checking_balance, tithing_balance, savings_balance};
-	print("Balance\t\t\t\tAmount\n");
-	foreach(var b in balances)
-		print(@"$(b.name)\t\t\t\t$(b.balance)\n");
+	var savings = control.add_balance("Savings");
+	control.set_balance_deposit_weight(savings, 5);
+	control.set_balance_withdraw_weight(savings, 0);
+
+	var tithing = control.add_balance("Tithing");
+	control.set_balance_deposit_weight(tithing, 1);
+	control.set_balance_withdraw_weight(tithing, 0);
+
+	control.balance_deposit(0, 1000, "");
+	control.balance_deposit(0, 10, "");
+	control.balance_deposit(0, 24, "");
+	control.balance_deposit(0, 36, "");
+	control.balance_withdraw(0, 400, "");
+	control.balance_withdraw(tithing, 106, "");
+
+	var render = view.render_account();
+
+	print(@"$(render)\n");
 }

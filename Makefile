@@ -3,9 +3,9 @@ SRC=$(shell find . | grep ".\.vala")
 PKG= \
 	--pkg gee-0.8 \
 	--pkg json-glib-1.0
-OUT=bin/Money
+OUT=bin/money
 
-all: run
+all: $(OUT)
 
 $(OUT): $(SRC)
 	valac $(SRC) $(PKG) -o $(OUT)
