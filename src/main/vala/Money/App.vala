@@ -36,7 +36,13 @@ namespace Money {
 	public void do_command(string filepath, Command command, string[] cmd_args) {
 		ensure_file(filepath);
 		string data;
-		FileUtils.get_contents(filepath, out data);
+		try {
+			FileUtils.get_contents(filepath, out data);
+		} catch(FileError error) {
+			print(@"Could not open file \"$(filepath)\":");
+			print(@"$(error.domain.to_string()) $(error.code)\n");
+			print(@"$(error.message)\n");
+		}
 
 		var serializer = new Money.Model.JsonSerializer();
 		var model = serializer.deserialize(data);
@@ -112,7 +118,7 @@ namespace Money {
 
 		data = serializer.serialize(model);
 		backup(filepath, data);
-		FileUtils.set_contents(filepath, data);
+		write(filepath, data);
 	}
 
 	public bool ensure_weights(Money.View.Renderer renderer) {
@@ -133,14 +139,18 @@ namespace Money {
 		var folder = file.get_parent();
 
 		if(!folder.query_exists()) {
-			folder.make_directory_with_parents();
+			try {
+				folder.make_directory_with_parents();
+			} catch(Error error) {
+				print(@"Error creating data folder: $(error.domain.to_string())\n$(error.code)\n$(error.message)\n");
+			}
 		}
 		if(!file.query_exists()) {
 			var model = Money.Model.init_model();
 			var serializer = new Money.Model.JsonSerializer();
 			var data = serializer.serialize(model);
 
-			FileUtils.set_contents(filepath, data);
+			write(filepath, data);
 		}
 	}
 
@@ -150,7 +160,17 @@ namespace Money {
 		var name = f.get_basename();
 		var timestamp = new DateTime.now_local().format("%F");
 		var filepath = folder.get_child(@"$(name)_$(timestamp).json").get_path();
-		FileUtils.set_contents(filepath, data);
+		write(filepath, data);
+	}
+
+	public void write(string filepath, string data) {
+		try {
+			FileUtils.set_contents(filepath, data);
+		} catch(FileError error) {
+			print(@"Failed to write to $(filepath):");
+			print(@"$(error.domain.to_string()) $(error.code)\n");
+			print(@"$(error.message)\n");
+		}
 	}
 
 }
