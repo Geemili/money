@@ -17,3 +17,6 @@ run: $(OUT)
 
 clean:
 	rm $(OUT)
+
+install: $(OUT)
+	mv $(OUT) $(HOME)/bin/

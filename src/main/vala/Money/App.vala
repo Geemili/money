@@ -157,7 +157,7 @@ namespace Money {
 	public void backup(string file, string data) {
 		var f = File.new_for_path(file);
 		var folder = f.get_parent();
-		var name = f.get_basename();
+		var name = f.get_basename().replace(".json", "");
 		var timestamp = new DateTime.now_local().format("%F");
 		var filepath = folder.get_child(@"$(name)_$(timestamp).json").get_path();
 		write(filepath, data);
